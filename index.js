@@ -9,6 +9,7 @@ const {
 
 const axios = require("axios");
 var Airtable = require("airtable");
+const { create } = require("domain");
 
 // Jira Basic Authentication for specific API Endpoint (get all issues from a board)
 const config = {
@@ -20,8 +21,33 @@ const config = {
   },
 };
 
+var created_record_ids = [];
+console.log(created_record_ids);
+
 // Authenticate into Airtable via API Key, and base ID (This can be found in Airtable settings and API doc)
 var base = new Airtable({ apiKey: AIRTABLE_APIKEY }).base(AIRTABLE_BASE_ID);
+
+async function deleteJiraIssues() {
+  try {
+      const recordIDs = 
+    base("Bugs from Jira").destroy(
+      ["recGJHVplCRuIGNxf"],
+      function (err, deletedRecords) {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        console.log("Deleted", deletedRecords.length, "records");
+      }
+    );
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+}
+
+// deleteJiraIssues();
+
+
 
 async function getJiraIssues() {
   try {
@@ -44,17 +70,18 @@ async function getJiraIssues() {
         ],
         function (err, records) {
           if (err) {
-            console.error(err);
+            // console.error(err);
             return;
           }
           records.forEach(function (record) {
+            // created_record_ids.push(record.getId())
             console.log(record.getId());
           });
         }
       );
     });
   } catch (err) {
-    console.log("Error: ", err);
+    // console.log("Error: ", err);
   }
 }
 
