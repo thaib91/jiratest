@@ -1,4 +1,6 @@
 require("dotenv").config();
+
+// Desstructured elements from .env
 const {
   JIRA_ENDPOINT,
   JIRA_AUTH,
@@ -9,7 +11,7 @@ const {
 
 const axios = require("axios");
 var Airtable = require("airtable");
-const { create } = require("domain");
+// const { create } = require("domain");
 
 // Jira Basic Authentication for specific API Endpoint (get all issues from a board)
 const config = {
@@ -21,31 +23,9 @@ const config = {
   },
 };
 
-var created_record_ids = [];
-console.log(created_record_ids);
 
 // Authenticate into Airtable via API Key, and base ID (This can be found in Airtable settings and API doc)
 var base = new Airtable({ apiKey: AIRTABLE_APIKEY }).base(AIRTABLE_BASE_ID);
-
-async function deleteJiraIssues() {
-  try {
-      const recordIDs = 
-    base("Bugs from Jira").destroy(
-      ["recGJHVplCRuIGNxf"],
-      function (err, deletedRecords) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log("Deleted", deletedRecords.length, "records");
-      }
-    );
-  } catch (err) {
-    console.log("Error: ", err);
-  }
-}
-
-// deleteJiraIssues();
 
 
 
@@ -56,10 +36,10 @@ async function getJiraIssues() {
     let mapJiraData = response.data.issues.map((i) => {
       base("Bugs from Jira").create(
         [
-          //Select specific table from the base to pass Jira data
+          //You can replace "Bugs from Jira" with any other table from your base
           {
             fields: {
-              // Within the fields object, the key will be record name and the value will be whatever you're trying to pass to Airtable from Jira
+              // Within the fields object, the key will be record name and the value will be the element you're trying to pass to Airtable from Jira
               id: i.id,
               "issue id": i.key,
               name: i.fields.issuetype.name,
@@ -70,18 +50,18 @@ async function getJiraIssues() {
         ],
         function (err, records) {
           if (err) {
-            // console.error(err);
+            console.error(err);
             return;
           }
           records.forEach(function (record) {
-            // created_record_ids.push(record.getId())
             console.log(record.getId());
+            //outputs in console all recordIDs that are created with the import
           });
         }
       );
     });
   } catch (err) {
-    // console.log("Error: ", err);
+    console.log("Error: ", err);
   }
 }
 
